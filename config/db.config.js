@@ -5,7 +5,6 @@ const config = {
     SECRET : process.env.SECRET,
 }
 
-config.URL = `mongodb+srv://${config.USER}:${config.PASSWORD}@cluster0.smvglxb.mongodb.net/${config.DB}?retryWrites=true&w=majority`;
-
+config.URL = `mongodb+srv://${config.USER}:${config.PASSWORD}@cluster0.f8myk41.mongodb.net/${config.DB}?retryWrites=true&w=majority`;
 
 module.exports = config;

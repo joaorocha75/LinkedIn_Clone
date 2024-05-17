@@ -11,6 +11,8 @@ app.get("/", function (req, res) {
   res.status(200).json({ message: "LinkedIn TSIW API" });
 });
 // routing middleware for resource Users
+app.use('/users', require('./routes/users.routes.js'))
+app.use('/alumni', require('./routes/alumni.routes.js'))
 app.get("*", function (req, res) {
   res.status(404).json({ message: "WHAT???" });
 });
