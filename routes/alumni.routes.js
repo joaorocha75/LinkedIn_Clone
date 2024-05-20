@@ -16,8 +16,17 @@ router.use((req, res, next) => {
     next();
 });
 
+router
+    .route("/")
+    .get(alumniController.getAlumni);
+    
 // Definir a rota para /alumni/:id antes da rota curinga
-router.route("/:id").get(alumniController.getAlumniById);
+router
+    .route("/:id")
+    .get(alumniController.getAlumniById)
+    .patch(authController.verifyToken, alumniController.updateAlumniById)
+    .delete(authController.verifyToken, alumniController.deleteAlumni);
+
 
 // Definir a rota curinga apenas depois de todas as outras rotas
 router.all("*", function (req, res) {
