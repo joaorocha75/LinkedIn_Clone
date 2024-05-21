@@ -14,8 +14,8 @@ module.exports = (mongoose) => {
                     idCompany: {type: mongoose.Schema.Types.ObjectId, ref: 'Company'},
                     name: {type: String, required: true},
                     position: {type: String},
-                    startDate: {type: Number},
-                    endDate: {type: Number},
+                    startDate: {type: Date},
+                    endDate: {type: Date},
                 }
             ]
         },

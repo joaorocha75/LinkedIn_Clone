@@ -27,6 +27,10 @@ router
     .patch(authController.verifyToken, alumniController.updateAlumniById)
     .delete(authController.verifyToken, alumniController.deleteAlumni);
 
+router
+    .route("/:id/companies")
+    .post(authController.verifyToken, alumniController.addCompanyToAlumni);
+
 
 // Definir a rota curinga apenas depois de todas as outras rotas
 router.all("*", function (req, res) {
