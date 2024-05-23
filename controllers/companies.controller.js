@@ -39,3 +39,119 @@ exports.createCompany = async (req, res) => {
         });
     }
 };
+
+exports.getCompanies = async (req, res) => {
+    try {
+        // Paginação
+        const page = parseInt(req.query.page) || 0;
+        const limit = parseInt(req.query.limit) || 10;
+
+        // Contagem total de empresas
+        const totalCompanies = await Company.countDocuments();
+
+        // Encontrar empresas com limite e deslocamento
+        const companies = await Company.find()
+                                       .skip(page * limit)
+                                       .limit(limit)
+                                       .exec();
+
+        // Construir objeto de resposta
+        const pagination = {
+            total: totalCompanies,
+            pages: Math.ceil(totalCompanies / limit),
+            current: page,
+            limit: limit
+        };
+
+        // Construir resposta
+        const responseData = {
+            pagination: pagination,
+            data: companies.map(companies => ({
+                id: companies.id,
+                name: companies.name,
+                location: companies.location,
+                associates: companies.associates,
+            }))
+        };
+
+        // Enviar resposta
+        res.status(200).json(responseData);
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: err.message || "Something went wrong. Please try again later"
+        });
+    }
+};
+
+exports.getCompanyById = async (req, res) => {
+    try {
+        let company = await Company.findById(req.params.id)
+        if(!company) {
+            return res.status(404).json({
+                success: false,
+                message: "Company not found"
+            });
+        }
+        res.status(200).json({
+            success: true,
+            company: company,
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: err.message || "Something went wrong. Please try again later"
+        });
+    }
+};
+
+exports.updateCompany = async (req, res) => {
+    const companyId = req.params.id;
+    const {name, location} = req.body;
+
+    if(req.loggedUserType !== "admin") {
+        return res.status(401).json({
+            success: false,
+            message: "You are not authorized to perform this action"
+        });
+    }
+
+    try {
+        const company = await Company.findById(companyId);
+        if(!company) {
+            return res.status(404).json({
+                success: false,
+                message: "Company not found"
+            });
+        }
+        
+        if (name) {
+            company.name = name;
+            // Buscar todos os usuários que têm a empresa no array companys
+            await User.updateMany(
+                {"companys.idCompany": companyId},
+                {"$set": {"companys.$.name": name}}
+            )
+        }
+
+        if(location) {
+            company.location = location;
+            // Update the company location in all users who have this company in their companies array
+            await User.updateMany(
+                { "companys.idCompany": companyId }, 
+                { "$set": { "companys.$.location": location } }
+            );
+        }
+
+        await company.save();
+        res.status(200).json({
+            success: true,
+            message: "Company updated successfully"
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: err.message || "Something went wrong. Please try again later"
+        });
+    }
+};

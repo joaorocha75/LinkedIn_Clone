@@ -54,7 +54,7 @@ exports.getAlumni = async (req, res) => {
                 type: alumni.type,
                 name: alumni.name,
                 email: alumni.email,
-                company: alumni.company,
+                companys: alumni.companys,
                 location: alumni.location,
                 courseEndDate: alumni.courseEndDate,
                 activityField: alumni.activityField,
@@ -114,7 +114,7 @@ exports.updateAlumniById = async (req, res) => {
 
         if (password && confirmPassword) {
             if (password === confirmPassword) {
-              if (bcrypt.compareSync(password, user.password)) {
+              if (bcrypt.compareSync(password, alumni.password)) {
                 return res
                   .status(400)
                   .json({ message: "The old password cannot be the same." });
@@ -159,6 +159,10 @@ exports.deleteAlumni = async (req, res) => {
     if (req.loggedUserType === "admin") {
         try {
             const alumni = await User.findByIdAndDelete(req.params.id);
+            await Company.updateMany(
+                { "associates.idUser": userId },
+                { $pull: { "associates": { idUser: userId } } }
+              );
             if (!alumni)
                 return res.status(404).json({
                     success: false,
@@ -182,11 +186,17 @@ exports.deleteAlumni = async (req, res) => {
 
     try {
         const alumni = await User.findByIdAndDelete(req.params.id);
+        //quando removido, é removido das companys
+        await Company.updateMany(
+            { "associates.idUser": userId },
+            { $pull: { "associates": { idUser: userId } } }
+          );
         if (!alumni)
             return res.status(404).json({
                 success: false,
                 message: "Alumni not found"
             });
+
         return res.status(200).json({
             success: true,
             message: "Alumni deleted successfully"
@@ -226,7 +236,7 @@ exports.addCompanyToAlumni = async (req, res) => {
 
         // Adicionar a empresa ao perfil do alumni
         alumni.companys.push({
-            company: companyId,
+            idCompany: companyId,
             name: company.name,
             position: position,
             startDate: startDate,
@@ -235,11 +245,7 @@ exports.addCompanyToAlumni = async (req, res) => {
 
         // Adicionar o alumni aos associados da empresa
         company.associates.push({
-            alumni: userId,
-            name: alumni.name,
-            position: position,
-            startDate: startDate,
-            endDate: endDate
+            idUser: userId,
         });
 
         // Salvar as alterações no perfil do alumni e na empresa

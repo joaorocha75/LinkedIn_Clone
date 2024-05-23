@@ -17,8 +17,16 @@ router.use((req, res, next) => {
 });
 
 router
-  .route("/")
-  .post(authController.verifyToken, companiesController.createCompany);
+    .route("/")
+    .post(authController.verifyToken, companiesController.createCompany)
+    .get(companiesController.getCompanies);
+
+router
+    .route("/:id")
+    .get(companiesController.getCompanyById)
+    .patch(authController.verifyToken, companiesController.updateCompany);
+
+
 
 router.all("*", function (req, res) {
     res.status(404).json({ message: "Companies: what???" });

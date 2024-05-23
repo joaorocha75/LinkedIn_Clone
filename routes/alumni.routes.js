@@ -20,7 +20,6 @@ router
     .route("/")
     .get(alumniController.getAlumni);
     
-// Definir a rota para /alumni/:id antes da rota curinga
 router
     .route("/:id")
     .get(alumniController.getAlumniById)
@@ -32,7 +31,6 @@ router
     .post(authController.verifyToken, alumniController.addCompanyToAlumni);
 
 
-// Definir a rota curinga apenas depois de todas as outras rotas
 router.all("*", function (req, res) {
     res.status(404).json({ message: "Alumni: what???" });
 });
