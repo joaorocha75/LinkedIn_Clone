@@ -3,6 +3,7 @@ module.exports = (mongoose) => {
         {
             name: {type: String, required: true, unique: true},
             location: {type: String, required: true},
+            verified: {type: Boolean, default: false},
             associates: [
                 {
                     idUser: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},

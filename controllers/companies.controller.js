@@ -7,6 +7,7 @@ exports.createCompany = async (req, res) => {
     const company = new Company({
         name: req.body.name,
         location: req.body.location,
+        verified: true,
     });
 
     if(req.loggedUserType !== "admin") {
@@ -70,6 +71,7 @@ exports.getCompanies = async (req, res) => {
                 id: companies.id,
                 name: companies.name,
                 location: companies.location,
+                verified: companies.verified,
                 associates: companies.associates,
             }))
         };
@@ -127,7 +129,6 @@ exports.updateCompany = async (req, res) => {
         
         if (name) {
             company.name = name;
-            // Buscar todos os usuários que têm a empresa no array companys
             await User.updateMany(
                 {"companys.idCompany": companyId},
                 {"$set": {"companys.$.name": name}}
@@ -136,7 +137,6 @@ exports.updateCompany = async (req, res) => {
 
         if(location) {
             company.location = location;
-            // Update the company location in all users who have this company in their companies array
             await User.updateMany(
                 { "companys.idCompany": companyId }, 
                 { "$set": { "companys.$.location": location } }
@@ -147,6 +147,43 @@ exports.updateCompany = async (req, res) => {
         res.status(200).json({
             success: true,
             message: "Company updated successfully"
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: err.message || "Something went wrong. Please try again later"
+        });
+    }
+};
+
+exports.verifyCompany = async (req, res) => {
+    const companyId = req.params.id;
+
+    // Verifica se o utilizador é um admin
+    if (req.loggedUserType !== "admin") {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized"
+        });
+    }
+
+    try {
+        const company = await Company.findById(companyId);
+        if (!company) {
+            return res.status(404).json({
+                success: false,
+                message: "Company not found"
+            });
+        }
+
+        company.verified = true; // Marca a empresa como verificada
+
+        await company.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Company verified successfully",
+            company
         });
     } catch (err) {
         res.status(500).json({

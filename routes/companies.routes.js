@@ -26,6 +26,10 @@ router
     .get(companiesController.getCompanyById)
     .patch(authController.verifyToken, companiesController.updateCompany);
 
+router
+    .route("/:id/verify")
+    .put(authController.verifyToken, companiesController.verifyCompany);
+
 
 
 router.all("*", function (req, res) {

@@ -28,7 +28,8 @@ router
 
 router
     .route("/:id/companies")
-    .post(authController.verifyToken, alumniController.addCompanyToAlumni);
+    .post(authController.verifyToken, alumniController.addCompanyToAlumni)
+    .patch(authController.verifyToken, alumniController.changeCompanyAlumni);
 
 
 router.all("*", function (req, res) {

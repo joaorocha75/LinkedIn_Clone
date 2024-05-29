@@ -210,7 +210,7 @@ exports.deleteAlumni = async (req, res) => {
 };
 
 // adicionar uma empresa a um alumni
-exports.addCompanyToAlumni = async (req, res) => {
+/* exports.addCompanyToAlumni = async (req, res) => {
     const userId = req.params.id;
     const { companyId, position, startDate, endDate } = req.body;
 
@@ -253,6 +253,142 @@ exports.addCompanyToAlumni = async (req, res) => {
         await company.save();
 
         res.status(201).json({ message: "Company added to alumni profile successfully" });
+    } catch (error) {
+        res.status(500).json({ message: error.message || "Something went wrong. Please try again later" });
+    }
+}; */
+
+exports.addCompanyToAlumni = async (req, res) => {
+    const userId = req.params.id;
+    const { companyId, name, location, position, startDate, endDate } = req.body;
+
+    if (userId !== req.loggedUserId) {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized"
+        });
+    }
+
+    try {
+        // Verificar se o alumni existe
+        const alumni = await User.findById(userId);
+        if (!alumni || alumni.type !== "alumni") {
+            return res.status(404).json({ message: "Alumni not found" });
+        }
+
+        // Verificar se o alumni já tem uma empresa associada
+        if (alumni.companys && alumni.companys.length > 0) {
+            return res.status(400).json({ message: "Alumni already has a company associated. You can't add another one using this route." });
+        }
+
+        let company;
+        if (companyId) {
+            // Verificar se a empresa existe e está verificada
+            company = await Company.findById(companyId);
+            if (!company) {
+                return res.status(404).json({ message: "Company not found" });
+            }
+            if (!company.verified) {
+                return res.status(400).json({ message: "Company is not verified" });
+            }
+        } else if (name) {
+            // Criar uma nova empresa com verificação pendente
+            company = new Company({
+                name: name,
+                location: location,
+                verified: false,
+                associates: []
+            });
+            await company.save();
+        } else {
+            return res.status(400).json({ message: "Company ID or name is required" });
+        }
+
+        // Adicionar a empresa ao perfil do alumni
+        alumni.companys.push({
+            idCompany: company.id,
+            name: company.name,
+            position: position,
+            startDate: startDate,
+            endDate: endDate
+        });
+
+        // Adicionar o alumni aos associados da empresa
+        company.associates.push({
+            idUser: userId
+        });
+
+        // Salvar as alterações no perfil do alumni e na empresa
+        await alumni.save();
+        await company.save();
+
+        res.status(201).json({ message: "Company added to alumni profile successfully" });
+    } catch (error) {
+        res.status(500).json({ message: error.message || "Something went wrong. Please try again later" });
+    }
+};
+
+exports.changeCompanyAlumni = async (req, res) => {
+    const userId = req.params.id;
+    const { newCompanyId, position, startDate } = req.body;
+
+    if (userId !== req.loggedUserId) {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized"
+        });
+    }
+
+    try {
+        // Verificar se o alumni existe
+        const alumni = await User.findById(userId);
+        if (!alumni || alumni.type !== "alumni") {
+            return res.status(404).json({ message: "Alumni not found" });
+        }
+
+        // Verificar se há uma empresa atual
+        const currentCompany = alumni.companys.find(company => company.endDate === null);
+        if (!currentCompany) {
+            return res.status(400).json({ message: "No current company found" });
+        }
+
+        // Atualizar a data de término da empresa atual
+        currentCompany.endDate = new Date();
+
+        // Remover o alumni dos associados da empresa atual
+        await Company.updateOne(
+            { _id: currentCompany.idCompany },
+            { $pull: { associates: { idUser: userId } } }
+        );
+
+        // Verificar se a nova empresa existe e está verificada
+        let newCompany = await Company.findById(newCompanyId);
+        if (!newCompany) {
+            return res.status(404).json({ message: "New company not found" });
+        }
+        if (!newCompany.verified) {
+            return res.status(400).json({ message: "New company is not verified" });
+        }
+
+        // Adicionar a nova empresa ao perfil do alumni
+        alumni.companys.push({
+            idCompany: newCompanyId,
+            name: newCompany.name,
+            position: position,
+            startDate: startDate,
+            endDate: null
+        });
+
+        // Adicionar o alumni aos associados da nova empresa
+        newCompany.associates.push({
+            idUser: userId,
+        });
+
+        // Salvar as alterações no perfil do alumni e na nova empresa
+        await alumni.save();
+        await newCompany.save();
+
+        res.status(200).json({ message: "Company changed successfully" });
     } catch (error) {
         res.status(500).json({ message: error.message || "Something went wrong. Please try again later" });
     }
