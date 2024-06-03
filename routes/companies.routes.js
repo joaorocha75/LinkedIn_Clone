@@ -30,6 +30,10 @@ router
     .route("/:id/verify")
     .put(authController.verifyToken, companiesController.verifyCompany);
 
+router
+    .route("/:id/associates/:alumniId")
+    .delete(authController.verifyToken, companiesController.removeAlumniFromCompany);
+
 
 
 router.all("*", function (req, res) {

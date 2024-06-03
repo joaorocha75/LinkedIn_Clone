@@ -192,3 +192,86 @@ exports.verifyCompany = async (req, res) => {
         });
     }
 };
+
+exports.deleteAlumniFromCompanyAsAdmin = async (req, res) => {
+    const companyId = req.params.id;
+    const alumniId = req.params.alumniId;
+
+    if (req.loggedUserType !== "admin") {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized"
+        });
+    }
+
+    try {
+        // Verificar se a empresa existe
+        const company = await Company.findById(companyId);
+        if (!company) {
+            return res.status(404).json({
+                success: false,
+                message: "Company not found"
+            });
+        }
+
+        // Remover o alumni do array de associados da empresa
+        company.associates = company.associates.filter(associate => associate.idUser.toString() !== alumniId);
+        await company.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Alumni removed from company successfully"
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message || "Something went wrong. Please try again later"
+        });
+    }
+};
+
+exports.removeAlumniFromCompany = async (req, res) => {
+    const companyId = req.params.id;
+    const alumniId = req.params.alumniId;
+
+    // Verificar se o usuário logado é um administrador
+    if (req.loggedUserType !== "admin") {
+        return res.status(401).json({
+            success: false,
+            message: "You are not authorized to perform this action"
+        });
+    }
+
+    try {
+        // Verificar se a empresa existe
+        const company = await Company.findById(companyId);
+        if (!company) {
+            return res.status(404).json({
+                success: false,
+                message: "Company not found"
+            });
+        }
+
+        // Remover o alumni do array de associados da empresa
+        company.associates = company.associates.filter(associate => associate.idUser.toString() !== alumniId);
+        await company.save();
+
+        // Remover a empresa do perfil do alumni
+        const alumni = await User.findById(alumniId);
+        if (alumni) {
+            alumni.companys = alumni.companys.filter(company => company.idCompany.toString() !== companyId);
+            await alumni.save();
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Alumni removed from company successfully and company removed from alumni profile"
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message || "Something went wrong. Please try again later"
+        });
+    }
+};
+

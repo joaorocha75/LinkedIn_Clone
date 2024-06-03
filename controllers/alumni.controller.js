@@ -209,55 +209,6 @@ exports.deleteAlumni = async (req, res) => {
     }
 };
 
-// adicionar uma empresa a um alumni
-/* exports.addCompanyToAlumni = async (req, res) => {
-    const userId = req.params.id;
-    const { companyId, position, startDate, endDate } = req.body;
-
-    if(userId !== req.loggedUserId) {
-        return res.status(401).json({
-            success: false,
-            message: "Unauthorized"
-        });
-    }
-
-    try {
-        // Verificar se o alumni existe
-        const alumni = await User.findById(userId);
-        if (!alumni || alumni.type !== "alumni") {
-            return res.status(404).json({ message: "Alumni not found" });
-        }
-
-        // Verificar se a empresa existe
-        const company = await Company.findById(companyId);
-        if (!company) {
-            return res.status(404).json({ message: "Company not found" });
-        }
-
-        // Adicionar a empresa ao perfil do alumni
-        alumni.companys.push({
-            idCompany: companyId,
-            name: company.name,
-            position: position,
-            startDate: startDate,
-            endDate: endDate
-        });
-
-        // Adicionar o alumni aos associados da empresa
-        company.associates.push({
-            idUser: userId,
-        });
-
-        // Salvar as alterações no perfil do alumni e na empresa
-        await alumni.save();
-        await company.save();
-
-        res.status(201).json({ message: "Company added to alumni profile successfully" });
-    } catch (error) {
-        res.status(500).json({ message: error.message || "Something went wrong. Please try again later" });
-    }
-}; */
-
 exports.addCompanyToAlumni = async (req, res) => {
     const userId = req.params.id;
     const { companyId, name, location, position, startDate, endDate } = req.body;
@@ -393,4 +344,3 @@ exports.changeCompanyAlumni = async (req, res) => {
         res.status(500).json({ message: error.message || "Something went wrong. Please try again later" });
     }
 };
-
