@@ -35,6 +35,18 @@ exports.createPost = async (req, res) => {
         });
 
         await newPost.save();
+
+        const user = await User.findById(userId);
+        if(!user) {
+            return res.status(404).json({
+                sucess: false,
+                message: "User not found"
+            });
+        }
+
+        user.points += 10;
+        await user.save();
+
         return res.status(201).json({
             success: true,
             message: "Post created successfully"
@@ -200,6 +212,16 @@ exports.commentPost = async (req, res) => {
 
         // Salvar as alterações no post
         await post.save();
+        const user = await User.findById(userId);
+        if(!user) {
+            return res.status(404).json({
+                sucess: false,
+                message: "User not found"
+            });
+        }
+
+        user.points += 10;
+        await user.save();
 
         // Responder com sucesso
         res.status(201).json({
@@ -263,6 +285,18 @@ exports.likePost = async (req, res) => {
 
         post.likes += 1;
         await post.save();
+
+        const user = await User.findById(userId);
+        if(!user) {
+            return res.status(404).json({
+                sucess: false,
+                message: "User not found"
+            });
+        }
+
+        user.points += 10;
+        await user.save();
+        
         res.status(200).json({ message: 'Post liked successfully', likes: post.likes });
     } catch (error) {
         res.status(500).json({ message: error.message || 'Something went wrong. Please try again later' });
@@ -272,7 +306,7 @@ exports.likePost = async (req, res) => {
 exports.dislikePost = async (req, res) => {
     const postId = req.params.id;
     const userId = req.loggedUserId;
-    
+
     if(!userId) {
         return res.status(401).json({ message: 'Unauthorized' });
     }
