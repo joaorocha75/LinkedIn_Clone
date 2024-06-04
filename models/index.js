@@ -14,4 +14,5 @@ db.mongoose
   });
 db.users = require("./users.model.js")(mongoose);
 db.companies = require("./companies.model.js")(mongoose);
+db.posts = require("./posts.model.js")(mongoose);
 module.exports = db;

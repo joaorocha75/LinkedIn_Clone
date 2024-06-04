@@ -14,6 +14,7 @@ app.get("/", function (req, res) {
 app.use('/users', require('./routes/users.routes.js'))
 app.use('/alumni', require('./routes/alumni.routes.js'))
 app.use('/companies', require('./routes/companies.routes.js'))
+app.use('/posts', require('./routes/posts.routes.js'))
 app.get("*", function (req, res) {
   res.status(404).json({ message: "WHAT???" });
 });

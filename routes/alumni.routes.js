@@ -36,5 +36,4 @@ router.all("*", function (req, res) {
     res.status(404).json({ message: "Alumni: what???" });
 });
 
-// EXPORT ROUTES (required by APP)
 module.exports = router;

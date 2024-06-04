@@ -60,7 +60,7 @@ exports.getCompanies = async (req, res) => {
         const pagination = {
             total: totalCompanies,
             pages: Math.ceil(totalCompanies / limit),
-            current: page,
+            current: page + 1,
             limit: limit
         };
 

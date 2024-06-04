@@ -28,7 +28,7 @@ exports.getAlumni = async (req, res) => {
         }
 
         // Contagem total de alumni
-        const totalAlumni = await User.countDocuments({ type: "Alumni" });
+        const totalAlumni = await User.countDocuments({ type: "alumni" });
 
         // Encontrar alumni com limite e deslocamento
         // Para as querys nao funcionarem, volta a forma inicial || const alumni = await User.find({ type: "Alumni" })
@@ -42,7 +42,7 @@ exports.getAlumni = async (req, res) => {
         const pagination = {
             total: totalAlumni,
             pages: Math.ceil(totalAlumni / limit),
-            current: page,
+            current: page + 1,
             limit: limit
         };
 
