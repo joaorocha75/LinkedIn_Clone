@@ -6,16 +6,30 @@ const Company = db.companies;
 exports.getAlumni = async (req, res) => {
     try {
         // Paginação
-        const page = parseInt(req.query.page) || 0; // Página atual
-        const limit = parseInt(req.query.limit) || 10; // Número de documentos por página
+        const page = parseInt(req.query.page);
+        const limit = parseInt(req.query.limit);
 
-        //Construção de objeto para pesquisa
+        // Validação de página e limite
+        if (isNaN(page) || page < 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Page must be 0 or a positive integer"
+            });
+        }
+        if (isNaN(limit) || limit <= 5) {
+            return res.status(400).json({
+                success: false,
+                message: "Limit must be a positive integer, greater than 5"
+            });
+        }
+
+        // Construção de objeto para pesquisa
         const query = { type: "alumni" };
         if (req.query.name) {
             query.name = { $regex: req.query.name, $options: "i" }; // Pesquisa de nome (case-insensitive)
         }
         if (req.query.company) {
-            query.company = { $regex: req.query.company, $options: "i" }; // Pesquisa de empresa (case-insensitive)
+            query.companys = { $elemMatch: { name: { $regex: req.query.company, $options: "i" } } }; // Pesquisa de empresa (case-insensitive)
         }
         if (req.query.location) {
             query.location = { $regex: req.query.location, $options: "i" }; // Pesquisa de localização (case-insensitive)
@@ -27,16 +41,15 @@ exports.getAlumni = async (req, res) => {
             query.activityField = { $regex: req.query.activityField, $options: "i" }; // Pesquisa de campo de atividade (case-insensitive)
         }
 
-        // Contagem total de alumni
-        const totalAlumni = await User.countDocuments({ type: "alumni" });
+        // Contagem total de alumni com filtro
+        const totalAlumni = await User.countDocuments(query);
 
         // Encontrar alumni com limite e deslocamento
-        // Para as querys nao funcionarem, volta a forma inicial || const alumni = await User.find({ type: "Alumni" })
         const alumni = await User.find(query)
-                                   .skip(page * limit)
-                                   .limit(limit)
-                                   .select('-password') // Excluir a senha dos resultados
-                                   .exec();
+            .skip(page * limit)
+            .limit(limit)
+            .select('-password') // Excluir a senha dos resultados
+            .exec();
 
         // Construção do objeto das páginas
         const pagination = {
