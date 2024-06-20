@@ -1,6 +1,7 @@
 const db = require("../models");
 const User = db.users;
 const Company = db.companies;
+const bcrypt = require("bcryptjs");
 
 //get all alumnis
 exports.getAlumni = async (req, res) => {
