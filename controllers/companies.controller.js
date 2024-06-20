@@ -44,8 +44,8 @@ exports.createCompany = async (req, res) => {
 exports.getCompanies = async (req, res) => {
     try {
         // Paginação
-        const page = parseInt(req.query.page);
-        const limit = parseInt(req.query.limit);
+        const page = parseInt(req.query.page) || 0;
+        const limit = parseInt(req.query.limit) || 10;
 
         // Validação de página e limite
         if (isNaN(page) || page < 0) {
@@ -54,10 +54,10 @@ exports.getCompanies = async (req, res) => {
                 message: "Page must be 0 or a positive integer"
             });
         }
-        if (isNaN(limit) || limit <= 5) {
+        if (isNaN(limit) || limit !== 10) {
             return res.status(400).json({
                 success: false,
-                message: "Limit must be a positive integer, greater than 5"
+                message: "Limit must be exactly 10"
             });
         }
 

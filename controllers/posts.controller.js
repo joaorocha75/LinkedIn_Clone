@@ -65,7 +65,19 @@ exports.getPosts = async (req, res) => {
         const page = parseInt(req.query.page) || 0; // Página atual
         const limit = parseInt(req.query.limit) || 10; // Número de documentos por página
 
-        // Construção do objeto para pesquisa
+        if (isNaN(page) || page < 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Page must be 0 or a positive integer"
+            });
+        }
+        if (isNaN(limit) || limit !== 10) {
+            return res.status(400).json({
+                success: false,
+                message: "Limit must be 10"
+            });
+        }
+
         const query = {};
         if (req.query.userId) {
             query.idUser = req.query.userId;
@@ -189,6 +201,14 @@ exports.commentPost = async (req, res) => {
         const { comment } = req.body;
         const userId = req.loggedUserId;
 
+        // Verificar se o comentário está vazio
+        if (!comment) {
+            return res.status(400).json({
+                success: false,
+                message: "Comment is required"
+            });
+        }
+
         // Encontrar o post pelo ID
         const post = await Posts.findById(postId).exec();
 
@@ -212,10 +232,11 @@ exports.commentPost = async (req, res) => {
 
         // Salvar as alterações no post
         await post.save();
+
         const user = await User.findById(userId);
-        if(!user) {
+        if (!user) {
             return res.status(404).json({
-                sucess: false,
+                success: false,
                 message: "User not found"
             });
         }
