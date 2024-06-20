@@ -37,9 +37,9 @@ exports.createPost = async (req, res) => {
         await newPost.save();
 
         const user = await User.findById(userId);
-        if(!user) {
+        if (!user) {
             return res.status(404).json({
-                sucess: false,
+                success: false,
                 message: "User not found"
             });
         }

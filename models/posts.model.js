@@ -4,7 +4,7 @@ module.exports = (mongoose) => {
             idUser: {type:mongoose.Schema.Types.ObjectId, ref: 'User'},
             message: {type:String, required: true},
             date: {type:Date, required: true},
-            expiresAt: {type:Date, required: true},
+            expiresAt: {type:Date, required: true, index: { expires: '0s' }},
             likes: {type: Number, default:0},
             comments: [
                 {
