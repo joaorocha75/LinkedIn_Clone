@@ -62,8 +62,8 @@ exports.createPost = async (req, res) => {
 exports.getPosts = async (req, res) => {
     try {
         // Paginação
-        const page = parseInt(req.query.page) || 0; // Página atual
-        const limit = parseInt(req.query.limit) || 10; // Número de documentos por página
+        const page = parseInt(req.query.page) || 0;
+        const limit = parseInt(req.query.limit) || 10; 
 
         if (isNaN(page) || page < 0) {
             return res.status(400).json({
@@ -86,17 +86,14 @@ exports.getPosts = async (req, res) => {
             query.message = { $regex: req.query.message, $options: "i" };
         }
 
-        // Contagem total de posts
         const totalPosts = await Posts.countDocuments(query);
 
-        // Encontrar posts com limite e deslocamento
         const posts = await Posts.find(query)
                                  .skip(page * limit)
                                  .limit(limit)
                                  .sort({ date: -1 }) // Ordenar por data (mais recente primeiro)
                                  .exec();
 
-        // Construção do objeto de paginação
         const pagination = {
             total: totalPosts,
             pages: Math.ceil(totalPosts / limit),
@@ -104,7 +101,6 @@ exports.getPosts = async (req, res) => {
             limit: limit
         };
 
-        // Construção da resposta
         const responseData = {
             pagination: pagination,
             data: posts.map(post => ({
@@ -201,7 +197,6 @@ exports.commentPost = async (req, res) => {
         const { comment } = req.body;
         const userId = req.loggedUserId;
 
-        // Verificar se o comentário está vazio
         if (!comment) {
             return res.status(400).json({
                 success: false,
@@ -209,7 +204,6 @@ exports.commentPost = async (req, res) => {
             });
         }
 
-        // Encontrar o post pelo ID
         const post = await Posts.findById(postId).exec();
 
         // Verificar se o post existe
@@ -230,7 +224,6 @@ exports.commentPost = async (req, res) => {
         // Adicionar o comentário ao post
         post.comments.push(newComment);
 
-        // Salvar as alterações no post
         await post.save();
 
         const user = await User.findById(userId);

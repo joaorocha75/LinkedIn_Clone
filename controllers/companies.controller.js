@@ -61,16 +61,13 @@ exports.getCompanies = async (req, res) => {
             });
         }
 
-        // Contagem total de empresas
         const totalCompanies = await Company.countDocuments();
 
-        // Encontrar empresas com limite e deslocamento
         const companies = await Company.find()
             .skip(page * limit)
             .limit(limit)
             .exec();
 
-        // Construir objeto de resposta
         const pagination = {
             total: totalCompanies,
             pages: Math.ceil(totalCompanies / limit),
@@ -78,7 +75,6 @@ exports.getCompanies = async (req, res) => {
             limit: limit
         };
 
-        // Construir resposta
         const responseData = {
             pagination: pagination,
             data: companies.map(company => ({
@@ -90,7 +86,6 @@ exports.getCompanies = async (req, res) => {
             }))
         };
 
-        // Enviar resposta
         res.status(200).json(responseData);
     } catch (err) {
         res.status(500).json({

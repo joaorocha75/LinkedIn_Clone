@@ -6,11 +6,9 @@ const bcrypt = require("bcryptjs");
 //get all alumnis
 exports.getAlumni = async (req, res) => {
     try {
-        // Paginação
         const page = parseInt(req.query.page) || 0;
         const limit = parseInt(req.query.limit) || 10;
 
-        // Validação de página e limite
         if (isNaN(page) || page < 0) {
             return res.status(400).json({
                 success: false,
